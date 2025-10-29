@@ -28,26 +28,6 @@ In addition, the feature automatically generates a horizontal bar chart that vis
 - Saves a complete report to `keyword_results.txt`.  
 - Generates a bar chart showing keyword frequency per issue.
 
-# Example Output
-'''
-text output displayed:
-Loaded 5573 issues from C:\Users\2megh\Downloads\poetry_issues_all.json.
-
-Searching for keyword: 'critical' (case-insensitive)
-Found 17 issue(s) containing 'critical':
-
-• Release archive contains vulnerable cryptography library
-   → The version of cryptography in the py3.5 directory is 3.2.1, which contains critical vulnerability CVE-2020-36242.
-   [Matches in this issue: 1]
-
-• Feature Request: track critical path, and provide per-dependency time cost in 'poetry update'
-   → It would be nice to see the critical path for update resolution, as well as the time it takes for each dependency to resolve.
-   [Matches in this issue: 2]
-
-Keyword 'critical' appeared 18 times across 17 issues.
-Results saved to 'C:\Users\2megh\Desktop\project-application-template\keyword_results.txt'
-'''
-
 # How to Run
 The below command to be used to run this feature
 '''
