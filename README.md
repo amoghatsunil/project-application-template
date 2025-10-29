@@ -13,6 +13,15 @@ With the utility functions provided, you should focus on implementing creative a
 
 In addition to the utility functions, an example analysis has also been implemented in `example_analysis.py`. It illustrates how to use the provided utility functions and how to produce output.
 
+### Feature 1 – Keyword Analysis
+
+This feature searches through all GitHub issues and lists the titles of those that contain a specified keyword.  
+The search is case-insensitive and includes both the title and the body/text of each issue.
+
+#### How to Run
+```bash
+python run.py --feature 1 --keyword <search_word>
+
 ## Setup
 
 To get started, your team should create a fork of this repository. Then, every team member should clone your repository to their local computer. 
