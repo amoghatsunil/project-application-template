@@ -21,14 +21,14 @@ The output displays the title of the issue, the exact sentences where the keywor
 
 In addition, the feature automatically generates a horizontal bar chart that visualizes how many times the keyword occurs across different issues.  
 
-# Key Highlights
+#### Key Highlights
 - Parses and analyzes the entire `poetry_issues_all.json` dataset.  
 - Case-insensitive keyword detection in both issue titles and descriptions.  
 - Displays relevant contextual sentences.  
 - Saves a complete report to `keyword_results.txt`.  
 - Generates a bar chart showing keyword frequency per issue.
 
-# How to Run
+#### How to Run
 The below command to be used to run this feature
 '''
 python run.py --feature 1 --keyword <search_word>
