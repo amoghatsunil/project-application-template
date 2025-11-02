@@ -62,9 +62,50 @@ python run.py --feature 0
 
 That will output basic information about the issues to the command line.
 
+## Analysis 2: Issue Status Visualization
+
+This feature provides two complementary insights:
+1. **Issue State Distribution** – percentage of open vs. closed issues (pie chart).
+2. **Open Issue Breakdown** – counts of open issues by their “status/…” labels (horizontal bar chart).
+
+### Output
+
+Running the script will:
+- Print a summary of issue counts to the console.
+- Display a pie chart for issue state distribution and a bar chart for Open Issue Breakdown.
+
+This analysis can be run using, 
+
+```
+python run.py --feature 2
+```
+
+at the root folder of the project. 
 
 ## VSCode run configuration
 
 To make the application easier to debug, runtime configurations are provided to run each of the analyses you are implementing. When you click on the run button in the left-hand side toolbar, you can select to run one of the three analyses or run the file you are currently viewing. That makes debugging a little easier. This run configuration is specified in the `.vscode/launch.json` if you want to modify it.
 
 The `.vscode/settings.json` also customizes the VSCode user interface sligthly to make navigation and debugging easier. But that is a matter of preference and can be turned off by removing the appropriate settings.
+
+## Feature 3 – Label Analysis
+
+This feature analyzes GitHub issue labels and their resolution times from the Poetry project dataset.  
+It calculates the frequency of the top 15 labels across all issues and computes the average resolution time in months per label, considering only closed issues.  
+The output includes side-by-side bar charts visualizing label frequency and average resolution time.
+
+### Key Highlights
+
+- Parses and analyzes the entire `poetry_issues_all.json` dataset.  
+- Calculates label frequency for all issues.  
+- Computes average resolution time from closed issues only.  
+- Generates bar charts for frequency and resolution time by label.  
+- Implemented as `LabelResolutionAnalysis` class, integrated via CLI.
+
+### How to Run
+
+Run this analysis feature using this command:  
+
+```
+python run.py --feature 3
+```
