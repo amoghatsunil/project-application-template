@@ -13,6 +13,27 @@ With the utility functions provided, you should focus on implementing creative a
 
 In addition to the utility functions, an example analysis has also been implemented in `example_analysis.py`. It illustrates how to use the provided utility functions and how to produce output.
 
+# Feature 1 – Keyword Analysis
+
+This feature performs an in-depth keyword search across all GitHub issues from the dataset.  
+It parses both the issue titles and descriptions to identify occurrences of the specified keyword (case-insensitive).  
+The output displays the title of the issue, the exact sentences where the keyword appears, and a summary count of matches per issue.
+
+In addition, the feature automatically generates a horizontal bar chart that visualizes how many times the keyword occurs across different issues.  
+
+#### Key Highlights
+- Parses and analyzes the entire `poetry_issues_all.json` dataset.  
+- Case-insensitive keyword detection in both issue titles and descriptions.  
+- Displays relevant contextual sentences.  
+- Saves a complete report to `keyword_results.txt`.  
+- Generates a bar chart showing keyword frequency per issue.
+
+#### How to Run
+The following command should be used to run this feature.
+'''
+python run.py --feature 1 --keyword <search_word>
+'''
+
 ## Setup
 
 To get started, your team should create a fork of this repository. Then, every team member should clone your repository to their local computer. 

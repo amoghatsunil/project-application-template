@@ -9,10 +9,10 @@ import argparse
 
 import config
 from example_analysis import ExampleAnalysis
-from analysis_keyword import KeywordAnalysis
+
+from keyword_analysis import KeywordAnalysis
 from analysis_label import LabelAnalysis
 from analysis_status import StatusAnalysis
-
 
 def parse_args():
     """
@@ -38,6 +38,9 @@ def parse_args():
     ap.add_argument('--label', '-l', type=str, required=False,
                     help='Optional parameter for analyses focusing on a specific label')
     
+    ap.add_argument('--keyword', '-k', type=str, required=False,
+                    help='Keyword to search for within issues (case-insensitive)')
+    
     return ap.parse_args()
 
 
@@ -51,10 +54,10 @@ config.overwrite_from_args(args)
 if args.feature == 0:
     ExampleAnalysis().run()
 elif args.feature == 1:
-    LabelAnalysis().run()
+    KeywordAnalysis().run()
 elif args.feature == 2:
     StatusAnalysis().run()
 elif args.feature == 3:
-    KeywordAnalysis().run()
+    LabelAnalysis().run()
 else:
     print('Need to specify which feature to run with --feature flag.')
