@@ -10,6 +10,8 @@ from model import Issue,Event
 import config
 
 _TOP_K_STATUSES = 10
+OUTPUT_PNG = Path("./figures/status_analysis/status_analysis.png")
+
 class StatusAnalysis:
     """
     Implements an example analysis of GitHub
@@ -24,6 +26,48 @@ class StatusAnalysis:
         self.USER:str = config.get_parameter('user')
         self.states: List[str] = []
         self.open_status_labels: List[str] = []
+    
+    def _plot_analysis(self, state_sizes, state_labels, status_items, status_keys, status_vals):
+        # plot
+        fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+        # Left: Pie for open vs closed
+        axes[0].pie(state_sizes, labels=state_labels, autopct="%1.1f%%", startangle=90)
+        axes[0].set_title("Issue Status Distribution (Open vs Closed)")
+        axes[0].axis("equal")
+
+        # Right: Horizontal bar for open issue statuses
+        ax = axes[1]
+        if status_items:
+            y = np.arange(len(status_keys))
+            ax.barh(y, status_vals)
+            ax.set_yticks(y, labels=status_keys)
+            ax.invert_yaxis()  # largest on top
+            ax.set_xlabel("Count")
+            ax.set_title("Open Issues by Status Type")
+
+            # Add value labels at the end of each bar
+            for i, v in enumerate(status_vals):
+                ax.text(v, i, f" {v}", va="center", ha="left")
+        else:
+            ax.axis("off")
+            ax.text(0.5, 0.5, "No open issues (or no matching status labels)",
+                    ha="center", va="center", transform=ax.transAxes)
+
+        plt.tight_layout()
+        plt.savefig(OUTPUT_PNG, dpi=200)
+        print(f"\nSaved figure to: {OUTPUT_PNG.resolve()}")
+        plt.show()
+    
+    def _print_analysis(self, state_labels, state_counts, status_items):
+        # print summary
+        print("\n\n")
+        print("Issue status counts:")
+        for label in state_labels:
+            print(f"  {label}: {state_counts[label]}")
+        print("\nOpen issue status labels:")
+        for label, cnt in status_items:
+            print(f"  {label}: {cnt}")
+        print("\n\n") 
     
     def run(self):
         """
@@ -64,44 +108,8 @@ class StatusAnalysis:
         status_keys = [k for k, _ in status_items]
         status_vals = [v for _, v in status_items]
 
-        # print summary
-        print("\n\n")
-        print("Issue status counts:")
-        for label in state_labels:
-            print(f"  {label}: {state_counts[label]}")
-        print("\nOpen issue status labels:")
-        for label, cnt in status_items:
-            print(f"  {label}: {cnt}")
-        print("\n\n")
-        # plot
-        fig, axes = plt.subplots(1, 2, figsize=(16, 6))
-        # Left: Pie for open vs closed
-        axes[0].pie(state_sizes, labels=state_labels, autopct="%1.1f%%", startangle=90)
-        axes[0].set_title("Issue Status Distribution (Open vs Closed)")
-        axes[0].axis("equal")
-
-        # Right: Horizontal bar for open issue statuses
-        ax = axes[1]
-        if status_items:
-            y = np.arange(len(status_keys))
-            ax.barh(y, status_vals)
-            ax.set_yticks(y, labels=status_keys)
-            ax.invert_yaxis()  # largest on top
-            ax.set_xlabel("Count")
-            ax.set_title("Open Issues by Status Type")
-
-            # Add value labels at the end of each bar
-            for i, v in enumerate(status_vals):
-                ax.text(v, i, f" {v}", va="center", ha="left")
-        else:
-            ax.axis("off")
-            ax.text(0.5, 0.5, "No open issues (or no matching status labels)",
-                    ha="center", va="center", transform=ax.transAxes)
-
-        # plt.tight_layout()
-        # plt.savefig(OUTPUT_PNG, dpi=200)
-        # print(f"\nSaved figure to: {OUTPUT_PNG.resolve()}")
-        plt.show()
+        self._print_analysis(state_labels, state_counts, status_items)
+        self._plot_analysis(state_sizes, state_labels, status_items, status_keys, status_vals)
 
 if __name__ == '__main__':
     # Invoke run method when running this module directly
