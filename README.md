@@ -42,7 +42,7 @@ python run.py --feature 0
 That will output basic information about the issues to the command line.
 
 
-# Feature 1 – Keyword Analysis
+## Feature 1 – Keyword Analysis
 
 This feature performs an in-depth keyword search across all GitHub issues from the dataset.  
 It parses both the issue titles and descriptions to identify occurrences of the specified keyword (case-insensitive).  
@@ -74,7 +74,7 @@ This feature provides two complementary insights:
 Running the script will:
 - Print a summary of issue counts to the console.
 - Display a pie chart for issue state distribution and a bar chart for Open Issue Breakdown.
-- The Gernerated figure will be saved at figures/status_analysis
+- The Generated figure will be saved at figures/status_analysis
 
 #### How to Run
 This analysis can be run using, 
