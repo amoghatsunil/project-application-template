@@ -9,7 +9,10 @@ import argparse
 
 import config
 from example_analysis import ExampleAnalysis
-from keyword_analysis import KeywordAnalysis 
+
+from keyword_analysis import KeywordAnalysis
+from analysis_label import LabelAnalysis
+from analysis_status import StatusAnalysis
 
 def parse_args():
     """
@@ -53,8 +56,8 @@ if args.feature == 0:
 elif args.feature == 1:
     KeywordAnalysis().run()
 elif args.feature == 2:
-    pass # TODO call second analysis
+    StatusAnalysis().run()
 elif args.feature == 3:
-    pass # TODO call third analysis
+    LabelAnalysis().run()
 else:
     print('Need to specify which feature to run with --feature flag.')

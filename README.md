@@ -62,6 +62,25 @@ python run.py --feature 0
 
 That will output basic information about the issues to the command line.
 
+## Analysis 2: Issue Status Visualization
+
+This feature provides two complementary insights:
+1. **Issue State Distribution** – percentage of open vs. closed issues (pie chart).
+2. **Open Issue Breakdown** – counts of open issues by their “status/…” labels (horizontal bar chart).
+
+### Output
+
+Running the script will:
+- Print a summary of issue counts to the console.
+- Display a pie chart for issue state distribution and a bar chart for Open Issue Breakdown.
+
+This analysis can be run using, 
+
+```
+python run.py --feature 2
+```
+
+at the root folder of the project. 
 
 ## VSCode run configuration
 
