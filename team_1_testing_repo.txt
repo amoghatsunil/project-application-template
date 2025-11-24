@@ -1,1 +1,2 @@
-https://github.com/amoghatsunil/project-application-template.git
+Repository: https://github.com/amoghatsunil/project-application-template.git
+Pull Request: https://github.com/Rozinator/project-application-template/pull/8
