@@ -1,60 +1,93 @@
-Command: python3 -m coverage run -m unittest discover tests
+Command: coverage run -m unittest discover -s tests -v
 
 Output:
-/Users/longlee/.matplotlib is not a writable directory
-Matplotlib created a temporary cache directory at /var/folders/3z/fl0f61gs3bl55q1p8tqlm8w00000gn/T/matplotlib-cg7i7ptx because there was an issue with the default path (/Users/longlee/.matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
-Matplotlib is building the font cache; this may take a moment.
-............
-----------------------------------------------------------------------
-Ran 12 tests in 1.044s
 
-OK
-Error: The '--keyword' parameter is required for this analysis.
+test_config_not_found (test_config.TestConfig.test_config_not_found) ... ok
+test_convert_values (test_config.TestConfig.test_convert_values) ... ok    
+test_find_config_path (test_config.TestConfig.test_find_config_path) ... ok
+test_get_parameter_defaults (test_config.TestConfig.test_get_parameter_defaults) ... ok
+test_get_parameter_env (test_config.TestConfig.test_get_parameter_env) ... ok
+test_init_config_already_loaded (test_config.TestConfig.test_init_config_already_loaded) ... ok
+test_init_config_loads_file (test_config.TestConfig.test_init_config_loads_file) ... ok
+test_init_config_no_file (test_config.TestConfig.test_init_config_no_file) ... ok
+test_overwrite_args (test_config.TestConfig.test_overwrite_args) ... ok    
+test_set_parameter (test_config.TestConfig.test_set_parameter) ... ok      
+test_loading_cached (test_data_loader.TestDataLoader.test_loading_cached) ... ok
+test_loading_fresh (test_data_loader.TestDataLoader.test_loading_fresh) ... Loaded 1 issues from dummy.json.
+ok
+test_path_setup (test_data_loader.TestDataLoader.test_path_setup) ... ok   
+test_find_sentences_comprehensive (test_keyword_analysis.TestKeywordAnalysis.test_find_sentences_comprehensive)
+Hits EVERY branch in _find_sentences_with_keyword: ... ok
+test_init_exits_without_keyword (test_keyword_analysis.TestKeywordAnalysis.test_init_exits_without_keyword)
+Test that the app calls sys.exit(1) if keyword is missing. ... Error: The '--keyword' parameter is required for this analysis.
 Usage: python run.py --feature 1 --keyword <word or phrase>
+ok
+test_init_success (test_keyword_analysis.TestKeywordAnalysis.test_init_success)
+Test successful initialization. ... ok
+test_regex_special_chars (test_keyword_analysis.TestKeywordAnalysis.test_regex_special_chars)
+Test that regex characters in keywords don't break the search. ... ok      
+test_run_fallback_snippet_logic (test_keyword_analysis.TestKeywordAnalysis.test_run_fallback_snippet_logic)
+Test the 'if not sentences' branch inside the loop. ...
+Loaded 1 issues from the dataset.
 
-Loaded 2 issues from the dataset.
+Searching for keyword: 'security' (case-insensitive)
+Found 1 issue(s) containing 'security':
 
-Searching for keyword: 'keyword' (case-insensitive)
+• Alert
+   → Alert. A security issue exists.
+   [Matches in this issue: 1]
+
+Results saved to 'C:\Users\nagam\OneDrive\Desktop\Fall2025\ENPM611\Project\Testing\project-application-template\keyword_results.txt'
+
+Keyword 'security' appeared 1 times across 1 issues.
+
+ok
+test_run_with_matches_normal (test_keyword_analysis.TestKeywordAnalysis.test_run_with_matches_normal)
+Test the 'if results' branch (Plotting & File Write). ...
+Loaded 1 issues from the dataset.
+
+Searching for keyword: 'bug' (case-insensitive)
+Found 1 issue(s) containing 'bug':
+
+• Bug Report
+   → Bug Report.
+   → There is a bug here.
+   [Matches in this issue: 2]
+
+Results saved to 'C:\Users\nagam\OneDrive\Desktop\Fall2025\ENPM611\Project\Testing\project-application-template\keyword_results.txt'
+
+Keyword 'bug' appeared 2 times across 1 issues.
+
+ok
+test_run_with_no_matches (test_keyword_analysis.TestKeywordAnalysis.test_run_with_no_matches)
+Test the 'if not results' branch (Early Exit). ...
+Loaded 1 issues from the dataset.
+
+Searching for keyword: 'bug' (case-insensitive)
 
 No issues found that match the given keyword.
 No chart will be displayed.
 
-
-Loaded 1 issues from the dataset.
-
-Searching for keyword: 'keyword' (case-insensitive)
-Found 1 issue(s) containing 'keyword':
-
-• Keyword issue
-   → Keyword issue. Prefix text keyword keyword keyword keyword keyword suffix
-   [Matches in this issue: 6]
-
-Results saved to '/Users/longlee/Desktop/project-application-template/keyword_results.txt'
-
-Keyword 'keyword' appeared 6 times across 1 issues.
-
-
-Loaded 2 issues from the dataset.
-
-Searching for keyword: 'error' (case-insensitive)
-Found 2 issue(s) containing 'error':
-
-• Database error
-   → Database error.
-   → Error connecting to DB.
-   → Another error occurred.
-   [Matches in this issue: 3]
-
-• Minor error in UI
-   → Minor error in UI.
-   → An error is shown when clicking the button.
-   [Matches in this issue: 2]
-
-Results saved to '/Users/longlee/Desktop/project-application-template/keyword_results.txt'
-
-Keyword 'error' appeared 5 times across 2 issues.
-
-
+ok
+test_dict_labels_as_open_issues (test_label_analysis.TestLabelAnalysis.test_dict_labels_as_open_issues)
+Dict-format labels on open issues are counted and do not cause errors. ... ok
+test_ignores_non_closed_and_missing_dates (test_label_analysis.TestLabelAnalysis.test_ignores_non_closed_and_missing_dates)
+Only closed issues with valid dates are used for resolution times. ... ok  
+test_issues_without_labels_field (test_label_analysis.TestLabelAnalysis.test_issues_without_labels_field)
+Issues without labels field should not cause errors. ... ok
+test_label_frequency_and_avg_resolution (test_label_analysis.TestLabelAnalysis.test_label_frequency_and_avg_resolution)
+Label frequency and average resolution time plotting inputs. ... ok
+test_load_data_from_file (test_label_analysis.TestLabelAnalysis.test_load_data_from_file)
+Test that load_data reads from actual file. ... ok
+test_create_event (test_model.TestModel.test_create_event) ... ok
+test_create_full_issue (test_model.TestModel.test_create_full_issue) ... ok
+test_enum_values (test_model.TestModel.test_enum_values) ... ok
+test_event_broken_date (test_model.TestModel.test_event_broken_date) ... ok
+test_event_empty (test_model.TestModel.test_event_empty) ... ok
+test_issue_exceptions (test_model.TestModel.test_issue_exceptions) ... ok  
+test_issue_none (test_model.TestModel.test_issue_none) ... ok
+test_plot_analysis_handles_no_status_items (test_status_analysis.StatusAnalysisTests.test_plot_analysis_handles_no_status_items) ... ok
+test_run_collects_states_and_labels (test_status_analysis.StatusAnalysisTests.test_run_collects_states_and_labels) ...
 
 
 Issue status counts:
@@ -69,4 +102,10 @@ Open issue status labels:
 
 
 
-Saved figure to: /private/var/folders/3z/fl0f61gs3bl55q1p8tqlm8w00000gn/T/tmpo75wo62t/status.png
+Saved figure to: C:\Users\nagam\AppData\Local\Temp\tmpxrfabmo6\status.png  
+ok
+
+----------------------------------------------------------------------     
+Ran 34 tests in 0.718s
+
+OK

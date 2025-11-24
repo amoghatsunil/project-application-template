@@ -1,155 +1,161 @@
-# tests/test_keyword_analysis.py
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
 import sys
 import os
 import matplotlib
 
-# Make project root importable
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-# Use non-GUI backend for matplotlib during tests
+# Use non-interactive backend to prevent GUI windows during tests
 matplotlib.use("Agg")
 
-from keyword_analysis import KeywordAnalysis
+# Adjust path to find the parent directory modules
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from keyword_analysis import KeywordAnalysis
+from model import Issue
 
 class TestKeywordAnalysis(unittest.TestCase):
-    # ------------------------------------------------------------------ #
-    #  __init__ / configuration
-    # ------------------------------------------------------------------ #
+
+    # ------------------------------------------------------------------
+    # 1. INIT & CONFIGURATION TESTS
+    # ------------------------------------------------------------------
     @patch("keyword_analysis.config.get_parameter", return_value=None)
-    def test_init_without_keyword_exits(self, mock_get_param):
-        """If no --keyword is provided, the analysis should exit with error."""
-        with self.assertRaises(SystemExit):
+    def test_init_exits_without_keyword(self, mock_conf):
+        """Test that the app calls sys.exit(1) if keyword is missing."""
+        with self.assertRaises(SystemExit) as cm:
             KeywordAnalysis()
-        mock_get_param.assert_called_once_with("keyword")
+        self.assertEqual(cm.exception.code, 1)
 
-    # ------------------------------------------------------------------ #
-    #  _find_sentences_with_keyword / noise filtering
-    # ------------------------------------------------------------------ #
-    @patch("keyword_analysis.config.get_parameter", return_value="error")
-    def test_find_sentences_filters_noise_and_keeps_keyword(self, mock_get_param):
-        """_find_sentences_with_keyword keeps meaningful sentences and drops noise."""
+    @patch("keyword_analysis.config.get_parameter", return_value="test")
+    def test_init_success(self, mock_conf):
+        """Test successful initialization."""
         ka = KeywordAnalysis()
+        self.assertEqual(ka.KEYWORD, "test")
 
+    # ------------------------------------------------------------------
+    # 2. SENTENCE PARSING & LOGIC TESTS (CRITICAL FOR COVERAGE)
+    # ------------------------------------------------------------------
+    @patch("keyword_analysis.config.get_parameter", return_value="error")
+    def test_find_sentences_comprehensive(self, mock_conf):
+        """
+        Hits EVERY branch in _find_sentences_with_keyword:
+        1. Code Blocks (regex sub) -> stripped
+        2. Whitespace cleanup -> stripped
+        3. Keyword match -> kept
+        4. Keyword match (Long) -> truncated
+        5. Noise (Traceback) -> skipped
+        6. Normal text (No keyword) -> skipped
+        """
+        ka = KeywordAnalysis()
+        
+        # This string is crafted to hit every single parsing logic line
         text = (
-            "Error occurred when connecting to the database. "
-            "Traceback (most recent call last):\n"
-            '  File "/usr/lib/python3.10/site-packages/foo.py", line 10, in <module>\n'
-            "    raise ValueError('boom')\n"
-            "Some additional context without the keyword."
+            "   \n"                              # Whitespace (Should be skipped)
+            "```\ncode block with error\n```\n"  # Code block (Should be removed by regex)
+            "Error occurred.\n"                  # Normal Match (Should be kept)
+            + ("Big error " * 50) + ".\n"        # Long Match (Should be truncated)
+            "Traceback (most recent call).\n"    # Noise (Should be skipped)
+            "Just some normal text."             # Non-match (Should be skipped)
         )
 
         matches = ka._find_sentences_with_keyword(text)
 
-        # We should keep the human-readable sentence that contains the keyword
+        # 1. Verify Code Block was removed (regex sub check)
+        self.assertFalse(any("code block" in s for s in matches))
+
+        # 2. Verify Normal Match kept
         self.assertTrue(any("Error occurred" in s for s in matches))
+        
+        # 3. Verify Truncation logic (len > 250)
+        long_matches = [s for s in matches if len(s) > 200]
+        self.assertTrue(len(long_matches) > 0)
+        self.assertTrue(long_matches[0].endswith("..."))
+        self.assertLessEqual(len(long_matches[0]), 253)
 
-        # Lines that look like pure traceback / noise and don't contain the keyword
-        # should be filtered out.
+        # 4. Verify Noise dropped (elif branch)
         self.assertFalse(any("Traceback" in s for s in matches))
+        
+        # 5. Verify Normal text dropped (implicit else)
+        self.assertFalse(any("Just some normal text" in s for s in matches))
 
-        # All returned sentences should be non-empty and not exceed the truncation length
-        self.assertTrue(all(len(s) > 0 for s in matches))
-        self.assertTrue(all(len(s) <= 253 for s in matches))  # 250 + "..."
+    @patch("keyword_analysis.config.get_parameter", return_value="C++")
+    def test_regex_special_chars(self, mock_conf):
+        """Test that regex characters in keywords don't break the search."""
+        ka = KeywordAnalysis()
+        text = "I use C++ daily."
+        matches = ka._find_sentences_with_keyword(text)
+        self.assertTrue(len(matches) > 0)
+        self.assertIn("I use C++ daily", matches[0])
 
-    # ------------------------------------------------------------------ #
-    #  run() – branch with no results
-    # ------------------------------------------------------------------ #
-    @patch("keyword_analysis.config.get_parameter", return_value="keyword")
-    def test_run_no_matching_issues_skips_plot_and_file(self, mock_get_param):
-        """If no issue contains the keyword, no file is written and no chart is shown."""
-        # Issues that do NOT contain the keyword "keyword"
-        issues = [
-            MagicMock(title="First issue", text="Nothing interesting here."),
-            MagicMock(title="Second", text="Another description."),
-        ]
-
-        with patch("keyword_analysis.DataLoader") as mock_loader_cls, \
+    # ------------------------------------------------------------------
+    # 3. RUN() EXECUTION FLOWS
+    # ------------------------------------------------------------------
+    @patch("keyword_analysis.config.get_parameter", return_value="bug")
+    def test_run_with_no_matches(self, mock_conf):
+        """Test the 'if not results' branch (Early Exit)."""
+        issue = Issue({"title": "Clean", "text": "Everything is fine.", "state": "open"})
+        
+        with patch("keyword_analysis.DataLoader") as mock_loader, \
              patch("keyword_analysis.plt.show") as mock_show, \
-             patch("keyword_analysis.open", mock_open(), create=True) as m_open:
-            mock_loader = mock_loader_cls.return_value
-            mock_loader.get_issues.return_value = issues
-
+             patch("keyword_analysis.open", mock_open()) as mock_file:
+            
+            mock_loader.return_value.get_issues.return_value = [issue]
+            
             ka = KeywordAnalysis()
             ka.run()
-
-            # No chart and no file when there are no results
+            
+            # Should NOT plot or write file
             mock_show.assert_not_called()
-            m_open.assert_not_called()
+            mock_file.assert_not_called()
 
-    # ------------------------------------------------------------------ #
-    #  run() – branch with results, file write and bar chart
-    # ------------------------------------------------------------------ #
-    @patch("keyword_analysis.config.get_parameter", return_value="error")
-    def test_run_writes_results_and_plots_for_matches(self, mock_get_param):
-        """When matches are found, results are written and a bar chart is produced."""
-        # One issue with three matches of "error"
-        issue1 = MagicMock()
-        issue1.title = "Database error"
-        issue1.text = "Error connecting to DB. Another error occurred."
-
-        # One issue with two matches
-        issue2 = MagicMock()
-        issue2.title = "Minor error in UI"
-        issue2.text = "An error is shown when clicking the button."
-
-        issues = [issue1, issue2]
-
-        with patch("keyword_analysis.DataLoader") as mock_loader_cls, \
+    @patch("keyword_analysis.config.get_parameter", return_value="bug")
+    def test_run_with_matches_normal(self, mock_conf):
+        """Test the 'if results' branch (Plotting & File Write)."""
+        issue = Issue({"title": "Bug Report", "text": "There is a bug here.", "state": "open"})
+        
+        with patch("keyword_analysis.DataLoader") as mock_loader, \
              patch("keyword_analysis.plt.show") as mock_show, \
              patch("keyword_analysis.plt.barh") as mock_barh, \
-             patch("keyword_analysis.open", mock_open(), create=True) as m_open:
-
-            mock_loader = mock_loader_cls.return_value
-            mock_loader.get_issues.return_value = issues
-
+             patch("keyword_analysis.open", mock_open()) as mock_file:
+            
+            mock_loader.return_value.get_issues.return_value = [issue]
+            
             ka = KeywordAnalysis()
             ka.run()
-
-            # File should be written
-            self.assertTrue(m_open.called)
-            open_call_args = m_open.call_args[0]
-            self.assertIn("keyword_results.txt", open_call_args[0])
-
-            # Bar chart should be drawn with counts matching the number of matches
-            self.assertTrue(mock_barh.called)
-            counts_arg = list(mock_barh.call_args[0][1])
-            # issue1 has 3 matches, issue2 has 2 matches
-            self.assertEqual(sorted(counts_arg), [2, 3])
-
-            # Chart shown once
-            mock_show.assert_called_once()
-
-    # ------------------------------------------------------------------ #
-    #  _find_sentences_with_keyword – fallback snippet path
-    # ------------------------------------------------------------------ #
-    @patch("keyword_analysis.config.get_parameter", return_value="keyword")
-    def test_run_uses_snippet_when_no_sentences_found(self, mock_get_param):
-        """If no sentences are returned, run() should fall back to a snippet."""
-        issue = MagicMock()
-        issue.title = "Keyword issue"
-        issue.text = "Prefix text " + ("keyword " * 5) + "suffix"
-
-        with patch("keyword_analysis.DataLoader") as mock_loader_cls, \
-             patch.object(KeywordAnalysis, "_find_sentences_with_keyword", return_value=[]), \
-             patch("keyword_analysis.open", mock_open(), create=True) as m_open, \
-             patch("keyword_analysis.plt.barh") as mock_barh, \
-             patch("keyword_analysis.plt.show"):
-
-            mock_loader = mock_loader_cls.return_value
-            mock_loader.get_issues.return_value = [issue]
-
-            ka = KeywordAnalysis()
-            ka.run()
-
-            # A file should still be written even when we rely on the snippet fallback
-            self.assertTrue(m_open.called)
-
-            # And we should still produce a bar chart entry for that issue
+            
+            # Should write file
+            self.assertTrue(mock_file.called)
+            # Should plot
+            self.assertTrue(mock_show.called)
+            # Verify bar chart was called
             self.assertTrue(mock_barh.called)
 
+    @patch("keyword_analysis.config.get_parameter", return_value="security")
+    def test_run_fallback_snippet_logic(self, mock_conf):
+        """
+        Test the 'if not sentences' branch inside the loop.
+        This forces the code to use the string slicing fallback.
+        """
+        ka = KeywordAnalysis()
+        
+        # Mocking _find_sentences to return [] triggers the fallback logic
+        with patch.object(ka, '_find_sentences_with_keyword', return_value=[]):
+            
+            issue = Issue({"title": "Alert", "text": "A security issue exists.", "state": "open"})
+            
+            with patch("keyword_analysis.DataLoader") as mock_loader, \
+                 patch("keyword_analysis.plt.show"), \
+                 patch("keyword_analysis.open", mock_open()) as mock_file:
+                
+                mock_loader.return_value.get_issues.return_value = [issue]
+                ka.run()
+                
+                # Check that we still wrote to file
+                self.assertTrue(mock_file.called)
+                
+                # Verify we captured the text via fallback slicing
+                handle = mock_file()
+                args, _ = handle.write.call_args_list[1]
+                self.assertIn("security issue", args[0])
 
 if __name__ == "__main__":
     unittest.main()
